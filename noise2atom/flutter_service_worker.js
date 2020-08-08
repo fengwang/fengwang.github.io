@@ -12,7 +12,7 @@ const RESOURCES = {
 "assets/fonts/MaterialIcons-Regular.ttf": "56d3ffdef7a25659eab6a68a3fbfaf16",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "115e937bb829a890521f72d2e664b632",
 "assets/AssetManifest.json": "54b463212173102d59134517c044e796",
-"main.dart.js": "c1a5aeffb889b0eddf6beb58d0b433a5",
+"main.dart.js": "2f950e73a0cf622bdbc69a7d3b3bd049",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "manifest.json": "1d8692ede8340b8ba6af88ed113057e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
