@@ -1,8 +1,8 @@
 {
-    "name": "_4dstem_ui",
-    "short_name": "_4dstem_ui",
+    "name": "EUI",
+    "short_name": "EUI",
     "start_url": ".",
-    "display": "minimal-ui",
+    "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
     "description": "A new Flutter project.",
