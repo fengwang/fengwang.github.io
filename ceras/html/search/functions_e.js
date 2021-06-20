@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['randn_545',['randn',['../namespaceceras.html#a3086a777114a2361cd7b50c9ea6bf586',1,'ceras']]],
+  ['randn_5flike_546',['randn_like',['../namespaceceras.html#ad2f293aaead8678738162c049594e51a',1,'ceras']]],
+  ['random_547',['random',['../namespaceceras.html#a2e4fd6b931eb2ea839d39e468cce1c10',1,'ceras']]],
+  ['random_5flike_548',['random_like',['../namespaceceras.html#aa3a2e7c07b75ff47e0b5cbf20147f063',1,'ceras']]],
+  ['random_5fnormal_5flike_549',['random_normal_like',['../namespaceceras.html#a5ee3b25632e70da4c9b0dc8e5267e69b',1,'ceras']]],
+  ['read_5ftensor_550',['read_tensor',['../namespaceceras.html#a4c595ab127344166cec13aea468c5839',1,'ceras']]],
+  ['rebind_551',['rebind',['../structceras_1_1ceras__private_1_1session.html#a711280880405872c7fa3c8535498cc43',1,'ceras::ceras_private::session']]],
+  ['reduce_552',['reduce',['../namespaceceras.html#a45806ff3491659fe141056e1c12a2b1f',1,'ceras']]],
+  ['reduce_5fmean_553',['reduce_mean',['../namespaceceras.html#a6d703388e9f15071857a92a9a9cfe8d4',1,'ceras::reduce_mean(Tsor const &amp;tsor)'],['../namespaceceras.html#ad053f5df67d22ebb1385d95a7e08779b',1,'ceras::reduce_mean(Ex const &amp;ex) noexcept']]],
+  ['reduce_5fsum_554',['reduce_sum',['../namespaceceras.html#a436365e13aa236f4d1c37e34bb467727',1,'ceras::reduce_sum(Tsor const &amp;tsor)'],['../namespaceceras.html#a788c5e88b66cb421a5a3843b7921a150',1,'ceras::reduce_sum(Ex const &amp;ex) noexcept']]],
+  ['regularizer_555',['regularizer',['../structceras_1_1regularizer.html#a29cb33528387c01f49aaa5cf6e8ead55',1,'ceras::regularizer']]],
+  ['relu_556',['relu',['../namespaceceras.html#a09c8f8245a7bf6a287d1333c7097afd1',1,'ceras']]],
+  ['relu_557',['ReLU',['../namespaceceras.html#ae479489416c64d7811125d08baf13123',1,'ceras']]],
+  ['remember_558',['remember',['../structceras_1_1ceras__private_1_1session.html#a95b614d8a988072105dde0f09f6168e6',1,'ceras::ceras_private::session']]],
+  ['repeat_559',['repeat',['../namespaceceras.html#ae33403c8d7baad7bf2a56c9be89ec88e',1,'ceras']]],
+  ['replace_5fplaceholder_5fwith_5fexpression_560',['replace_placeholder_with_expression',['../namespaceceras.html#a4c771de6e382ade62a08d98fbfcce1a3',1,'ceras']]],
+  ['repmat_561',['repmat',['../namespaceceras.html#ac364bdd19df4bd87382e9680bf1a28f7',1,'ceras']]],
+  ['reset_562',['reset',['../structceras_1_1variable.html#a99f763034945cb2408b8b03e19da2a46',1,'ceras::variable::reset()'],['../structceras_1_1tensor.html#a9c15ac44db361176158d470413d55449',1,'ceras::tensor::reset()'],['../structceras_1_1place__holder.html#aee8759c6d37b650ae7dd3c634490b055',1,'ceras::place_holder::reset()']]],
+  ['reshape_563',['Reshape',['../namespaceceras.html#a1c77bf357ba8772f060701a6a7aaa9e0',1,'ceras']]],
+  ['reshape_564',['reshape',['../namespaceceras.html#a98a1a2435886d7d6ea0f85da9bbc7875',1,'ceras::reshape(Tsor const &amp;ts, std::vector&lt; unsigned long &gt; const &amp;new_shape)'],['../namespaceceras.html#a3c233ed2d443ba49ba7143023ad495a1',1,'ceras::reshape(std::vector&lt; unsigned long &gt; const &amp;new_shape, bool include_batch_flag=true) noexcept'],['../structceras_1_1tensor.html#a4fc817b7718bd183f2e1d8c27ba34426',1,'ceras::tensor::reshape(std::vector&lt; unsigned long &gt; const &amp;new_shape)']]],
+  ['resize_565',['resize',['../structceras_1_1tensor.html#aaa0d985a31f6dd4d1832647e7dce4a90',1,'ceras::tensor']]],
+  ['restore_566',['restore',['../structceras_1_1ceras__private_1_1session.html#aeccd3890acf8f7366908736cf9286ae8',1,'ceras::ceras_private::session']]],
+  ['rmsprop_567',['rmsprop',['../structceras_1_1rmsprop.html#a80702a01248fc668a366a85043435196',1,'ceras::rmsprop']]],
+  ['run_568',['run',['../structceras_1_1ceras__private_1_1session.html#a48504bc285f78f440e9f89685cdb9b73',1,'ceras::ceras_private::session']]]
+];
