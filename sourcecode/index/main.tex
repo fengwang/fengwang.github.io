@@ -1,0 +1,153 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[cache=false,newfloat]{minted}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{mathpazo}
+\usepackage[math,quiet]{fontspec}
+\usepackage[math]{mathspec}
+\usepackage[nonewpage]{imakeidx}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{setspace}
+\usepackage{alltt}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{bbm}
+\usepackage{enumitem}
+\usepackage{pifont}
+
+
+
+%\makeindex
+
+%\onehalfspacing
+\setstretch{1.2}
+\renewcommand{\arraystretch}{1.2}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\large\itshape}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\itshape}{\thesubsubsection.}{0.5em}{}
+
+%\setmainfont[Ligatures=TeX]{EB Garamond SC}
+%\setmainfont[Ligatures=TeX]{Apple Garamond}
+%\setmainfont[Ligatures=TeX]{EB Garamond}
+%\setmainfont[Ligatures=TeX]{Noto Sans CJK SC}
+\setmathsfont(Digits,Latin,Greek)[Numbers={Lining,Proportional}]{GFS Neohellenic Math}
+%\setsansfont[Ligatures=TeX]{Averia Sans GWF}
+%\setsansfont[Ligatures=TeX]{Noto Sans}
+\setsansfont[Ligatures=TeX]{Fira Sans Condensed}
+\setmonofont[Ligatures=TeX]{Ricty Diminished Discord}
+%\newfontfamily\cjkfont{Noto Sans CJK SC}
+%\newfontfamily\cjkfont{LXGW WenKai Mono}
+\newfontfamily\cjkfont{LXGW New Clear Gothic}
+\XeTeXlinebreaklocale "zh" % linebreak, otherwise all will in one line
+\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
+
+
+\definecolor{lkcolor}{rgb}{0.15,0.55,0.82}
+\hypersetup{
+    colorlinks=true,        % false: boxed links; true: colored links
+    linkcolor=lkcolor,      % color of internal links (change box color with linkbordercolor)
+    citecolor=green,        % color of links to bibliography
+    filecolor=cyan,         % color of file links
+    urlcolor=magenta        % color of external links
+}
+
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=1pt,fill=cyan,] (char) {#1};}}
+\usemintedstyle{monokai}
+%\renewcommand{\theFancyVerbLine}{\sffamily \textcolor[rgb]{0.0,0.5,0.5}{\scriptsize \oldstylenums{\arabic{FancyVerbLine}}}}
+\renewcommand{\theFancyVerbLine}{\sffamily \textcolor[rgb]{0.0,0.17,0.21}{\scriptsize \oldstylenums{\arabic{FancyVerbLine}}}}
+\definecolor{lbcolor}{rgb}{0.0,0.17,0.21}
+\newenvironment{code}{\captionsetup{type=listing}}{}
+\SetupFloatingEnvironment{listing}{name=Source Code}
+
+
+%
+%
+% Do not edit code above this line
+%
+%
+
+ %\usepackage[paperwidth=8.3in, paperheight=11.7in]{geometry}%% A4
+ %\usepackage[paperwidth=12.5in, paperheight=40in]{geometry}
+ %\usepackage[paperwidth=32cm, paperheight=40cm]{geometry} %% remember to update geometry settings
+ \usepackage[paperwidth=24cm, paperheight=40cm]{geometry} %% remember to update geometry settings
+ \geometry{
+ left=20mm,
+ right=20mm,
+ top=20mm,
+ bottom=20mm,
+ }
+
+\title{An Exchange with Feng}
+
+%\author{Feng Wang}
+
+\date{\today}
+
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty} % turn off page number
+
+\tableofcontents
+
+
+
+\section{Selected articles}
+
+
+\begin{enumerate}
+    \item[\ding{71}] \textbf{TODO}
+    \item[\ding{71}] $\cdots$
+\end{enumerate}
+
+
+\section{Selected papers}
+
+\begin{enumerate}
+    \item[\ding{73}] Noise2Atom: \url{https://fengwang.github.io/noise2atom}
+    \item[\ding{73}] Multi--resolution CNN for inverse problems: \url{https://fengwang.github.io/mdcnn}
+    \item[\ding{73}] Self--supervised Noise2Predestination: \url{https://fengwang.github.io/noise2predestination}
+    \item[\ding{73}] LARBED inversion \url{https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.117.015501}
+\end{enumerate}
+
+
+
+\section{Contact me}
+
+\begin{enumerate}
+    \item[\ding{75}] Email: \href{mailto:wfen@protonmail.ch}{\nolinkurl{wfen@protonmail.ch} }
+    \item[\ding{75}] Webpage: \url{https://fengwang.github.io/}
+    \item[\ding{75}] Github: \url{https://github.com/fengwang/}
+    \item[\ding{75}] Linkedin: \url{https://www.linkedin.com/in/feng-wang-157111150/}
+\end{enumerate}
+
+
+
+
+\section*{Source code to this page}
+
+\url{https://github.com/fengwang/fengwang.github.io/tree/master/sourcecode/index}
+
+
+
+%\bibliographystyle{plain}
+%\bibliography{references}
+
+%\printindex
+
+\end{document}
+
