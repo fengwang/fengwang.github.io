@@ -1,0 +1,202 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[cache=false,newfloat]{minted}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage[square,numbers]{natbib}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{mathpazo}
+\usepackage[math,quiet]{fontspec}
+\usepackage[math]{mathspec}
+\usepackage[nonewpage]{imakeidx}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{setspace}
+\usepackage{alltt}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{bbm}
+
+
+
+%\makeindex
+
+%\onehalfspacing
+\setstretch{1.2}
+\renewcommand{\arraystretch}{1.2}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\large\itshape}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\itshape}{\thesubsubsection.}{0.5em}{}
+
+\setmainfont[Ligatures=TeX]{EB Garamond}
+%\setmainfont[Ligatures=TeX]{Noto Sans CJK SC}
+\setmathsfont(Digits,Latin,Greek)[Numbers={Lining,Proportional}]{GFS Neohellenic Math}
+%\setsansfont[Ligatures=TeX]{Averia Sans GWF}
+%\setsansfont[Ligatures=TeX]{Noto Sans}
+\setsansfont[Ligatures=TeX]{Fira Sans Condensed}
+\setmonofont[Ligatures=TeX]{Ricty Diminished Discord}
+%\newfontfamily\cjkfont{Noto Sans CJK SC}
+\newfontfamily\cjkfont{Maple Mono SC NF}
+\XeTeXlinebreaklocale "zh" % linebreak, otherwise all will in one line
+\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
+
+
+\definecolor{lkcolor}{rgb}{0.15,0.55,0.82}
+\hypersetup{
+    colorlinks=true,        % false: boxed links; true: colored links
+    linkcolor=lkcolor,      % color of internal links (change box color with linkbordercolor)
+    citecolor=green,        % color of links to bibliography
+    filecolor=cyan,         % color of file links
+    urlcolor=magenta        % color of external links
+}
+
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=1pt,fill=cyan,] (char) {#1};}}
+\usemintedstyle{monokai}
+%\renewcommand{\theFancyVerbLine}{\sffamily \textcolor[rgb]{0.0,0.5,0.5}{\scriptsize \oldstylenums{\arabic{FancyVerbLine}}}}
+\renewcommand{\theFancyVerbLine}{\sffamily \textcolor[rgb]{0.0,0.17,0.21}{\scriptsize \oldstylenums{\arabic{FancyVerbLine}}}}
+\definecolor{lbcolor}{rgb}{0.0,0.17,0.21}
+\definecolor{mbcolor}{rgb}{0.2,0.47,0.61}
+\newenvironment{code}{\captionsetup{type=listing}}{}
+\SetupFloatingEnvironment{listing}{name=Source Code}
+
+%
+%
+% Do not edit code above this line
+%
+%
+
+ %\usepackage[paperwidth=8.3in, paperheight=11.7in]{geometry}%% A4
+ %\usepackage[paperwidth=12.5in, paperheight=40in]{geometry}
+ \usepackage[paperwidth=32cm, paperheight=50cm]{geometry}
+ \geometry{
+ left=20mm,
+ right=20mm,
+ top=20mm,
+ bottom=20mm,
+ }
+
+\title{Deploy Lsky Pro Album \\ 
+\large {\cjkfont 部署兰空图床}
+}
+
+\author{Feng Wang}
+
+\date{\today}
+
+
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty} % turn off page number
+
+\tableofcontents
+
+\section{Introduction}
+
+Lsky--pro\footnote{\url{https://github.com/lsky-org/lsky-pro}} is a good photo album serving application. We depoly it on the cloud using docker.
+
+\begin{flushright}
+{\cjkfont 我们用 docker 来部署兰空这一优秀的图床程序。}
+\end{flushright}
+
+
+
+
+\section{Details}
+
+
+We prepare a \textit{docker-compose.yaml} file 
+
+\begin{flushright}
+{\cjkfont 我们准备一个 \textit{docker-compose.yaml} 文件如下}
+\end{flushright}
+
+
+\begin{code}
+
+\begin{minted}[linenos,bgcolor=mbcolor,breaklines=true,fontsize=\footnotesize,framesep=5mm,escapeinside=@@]{docker}
+version: '3'
+services:
+  lskypro:
+    image: halcyonazure/lsky-pro-docker:latest
+    restart: unless-stopped
+    hostname: lskypro
+    container_name: lskypro
+    volumes:
+      - ./html:/var/www/html/
+      - ./data:/database
+    ports:
+      - "2746:80"
+\end{minted}
+
+\captionof{listing}{The \textit{docker-comse.yaml} file}
+\label{codecode}
+\end{code}
+
+
+We start the container with command
+
+\begin{flushright}
+{\cjkfont 我们以如下命令启动容器}
+\end{flushright}
+
+\begin{code}
+
+\begin{minted}[linenos,bgcolor=mbcolor,breaklines=true,fontsize=\footnotesize,framesep=5mm,escapeinside=@@]{bash}
+docker-compose up -d 
+\end{minted}
+
+\captionof{listing}{Bring up the container}
+\label{codecode}
+\end{code}
+
+
+
+
+\section{Configuration}
+
+We open the webpage \textit{http://\{IP\}:2746} with our web browser, set up the database backend to SQLite, and initialize the email and password.
+
+\begin{flushright}
+{\cjkfont 我们以浏览器打开 \textit{http://\{IP\}:2746}，设置数据库后端为 SQLite，并初始化电子信箱与密码。}
+\end{flushright}
+
+
+
+
+
+
+\section{Closure}
+
+We open the webpage \textit{http://\{IP\}:2746} again, and our cloud album is ready to go.
+
+\begin{flushright}
+{\cjkfont 再次打开 \textit{http://\{IP\}:2746}，我们的图片已经可用了。}
+\end{flushright}
+
+
+\section*{About this page}
+
+
+\begin{enumerate}
+\item html: \url{https://fengwang.github.io/blogs/deploy.lsky.pro/main.html}
+\item pdf: \url{https://fengwang.github.io/blogs/deploy.lsky.pro/main.pdf}
+\item tex: \url{https://fengwang.github.io/blogs/deploy.lsky.pro/main.tex}
+\end{enumerate}
+
+
+
+
+
+\end{document}
+
