@@ -7,29 +7,6 @@ disqusShortname = ""
 ignoreFiles = [ "\\.Rmd$", "\\.Rmarkdown$", "_cache$" ]
 footnotereturnlinkcontents = "↩"
 
-[caches]
-  [caches.assets]
-    dir = ':resourceDir/_gen'
-    maxAge = -1
-  [caches.getresource]
-    dir = ':cacheDir/:project'
-    maxAge = -1
-  [caches.images]
-    dir = ':cacheDir/images'
-    maxAge = -1
-  [caches.misc]
-    dir = ':cacheDir/:project'
-    maxAge = -1
-  [caches.modulegitinfo]
-    dir = ':cacheDir/modules'
-    maxAge = '24h'
-  [caches.modulequeries]
-    dir = ':cacheDir/modules'
-    maxAge = '24h'
-  [caches.modules]
-    dir = ':cacheDir/modules'
-    maxAge = -1
-
 [permalinks]
 note = "/note/:year/:month/:day/:slug/"
 post = "/post/:year/:month/:day/:slug/"

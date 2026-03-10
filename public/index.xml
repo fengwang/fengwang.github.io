@@ -2,24 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Feng&#39;s Blog</title>
-    <link>https://fengwang.github.io/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on Feng&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 10 Mar 2026 21:20:12 +0100</lastBuildDate>
-    <atom:link href="https://fengwang.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Hugo Qucik Introduction</title>
-      <link>https://fengwang.github.io/posts/my-first-post/</link>
+      <link>http://localhost:1313/posts/my-first-post/</link>
       <pubDate>Tue, 10 Mar 2026 21:20:12 +0100</pubDate>
-      <guid>https://fengwang.github.io/posts/my-first-post/</guid>
+      <guid>http://localhost:1313/posts/my-first-post/</guid>
       <description>&lt;h3 id=&#34;first-post-with-hugo&#34;&gt;First post with Hugo&lt;/h3&gt;&#xA;&lt;p&gt;In the root folder, execute command&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;hugo new content content/posts/my-first-post.md&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;This will create a new markdown file in the &lt;code&gt;content/posts&lt;/code&gt; directory with the name &lt;code&gt;my-first-post.md&lt;/code&gt;. The file will contain some default front matter, which you can edit to include your desired title, date, and other metadata.&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt;---&#xA;title: &amp;quot;My First Post&amp;quot;&#xA;date: 2026-03-10T21:20:12+01:00&#xA;draft: true&#xA;---&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;The metadata are intoduced in Hugo as &amp;ldquo;front matter&amp;rdquo;. The &lt;code&gt;title&lt;/code&gt; field specifies the title of the post, the &lt;code&gt;date&lt;/code&gt; field indicates when the post was created, and the &lt;code&gt;draft&lt;/code&gt; field is set to &lt;code&gt;true&lt;/code&gt;, which means that the post will not be published until you change it to &lt;code&gt;false&lt;/code&gt;. More information about front matter can be found in the &lt;a href=&#34;https://gohugo.io/content-management/front-matter/&#34;&gt;Hugo documentation&lt;/a&gt;.&lt;/p&gt;</description>
     </item>
     <item>
       <title>About</title>
-      <link>https://fengwang.github.io/about/</link>
+      <link>http://localhost:1313/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://fengwang.github.io/about/</guid>
+      <guid>http://localhost:1313/about/</guid>
       <description>&lt;p&gt;A former physicist turned machine learning engineer, I have a passion for learning and sharing knowledge. With a background in physics, I bring a unique perspective to software development, combining analytical thinking with creativity. I enjoy exploring new technologies and applying them to solve real-world problems. In my free time, I like to read, travel, and experiment with new frontiers in deep learning and artificial intelligence. This blog is a platform for me to share my insights, experiences, and projects in the world of software engineering and beyond. I hope to inspire others to pursue their passions and contribute to the ever-evolving field of technology.&lt;/p&gt;</description>
     </item>
   </channel>
