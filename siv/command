@@ -1,2 +1,0 @@
-/usr/bin/marp my.md -o my.html
-/usr/bin/marp my.md -o my.pdf
