@@ -1,0 +1,77 @@
+baseURL = 'https://fengwang.github.io/'
+languageCode = 'en-us'
+theme = 'xmin'
+title = "Feng's Blog"
+googleAnalytics = ""
+disqusShortname = ""
+ignoreFiles = [ "\\.Rmd$", "\\.Rmarkdown$", "_cache$" ]
+footnotereturnlinkcontents = "↩"
+
+[caches]
+  [caches.assets]
+    dir = ':resourceDir/_gen'
+    maxAge = -1
+  [caches.getresource]
+    dir = ':cacheDir/:project'
+    maxAge = -1
+  [caches.images]
+    dir = ':cacheDir/images'
+    maxAge = -1
+  [caches.misc]
+    dir = ':cacheDir/:project'
+    maxAge = -1
+  [caches.modulegitinfo]
+    dir = ':cacheDir/modules'
+    maxAge = '24h'
+  [caches.modulequeries]
+    dir = ':cacheDir/modules'
+    maxAge = '24h'
+  [caches.modules]
+    dir = ':cacheDir/modules'
+    maxAge = -1
+
+[permalinks]
+note = "/note/:year/:month/:day/:slug/"
+post = "/post/:year/:month/:day/:slug/"
+
+[[menu.main]]
+name = "Home"
+url = ""
+weight = 1
+
+[[menu.main]]
+name = "About"
+url = "about/"
+weight = 2
+
+[[menu.main]]
+name = "Categories"
+url = "categories/"
+weight = 3
+
+[[menu.main]]
+name = "Tags"
+url = "tags/"
+weight = 4
+
+[[menu.main]]
+name = "Subscribe"
+url = "index.xml"
+
+[params]
+description = "Feng's minmal blog."
+footer = "&copy; Feng Wang"
+
+[markup.highlight]
+codeFences = false
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[markup.goldmark.extensions.passthrough]
+enable = true
+
+  [markup.goldmark.extensions.passthrough.delimiters]
+  block = [ [ "\\[", "\\]" ], [ "$$", "$$" ] ]
+  inline = [ [ "\\(", "\\)" ] ]
+
