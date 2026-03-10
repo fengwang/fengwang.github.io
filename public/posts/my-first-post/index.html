@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hugo Qucik Introduction | Feng&#39;s Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/index.xml">Subscribe</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Hugo Qucik Introduction</span></h1>
+
+<h2 class="date">2026/03/10</h2>
+</div>
+
+<main>
+<h3 id="first-post-with-hugo">First post with Hugo</h3>
+<p>In the root folder, execute command</p>
+<pre><code class="language-bash">hugo new content content/posts/my-first-post.md
+</code></pre>
+<p>This will create a new markdown file in the <code>content/posts</code> directory with the name <code>my-first-post.md</code>. The file will contain some default front matter, which you can edit to include your desired title, date, and other metadata.</p>
+<pre><code>---
+title: &quot;My First Post&quot;
+date: 2026-03-10T21:20:12+01:00
+draft: true
+---
+</code></pre>
+<p>The metadata are intoduced in Hugo as &ldquo;front matter&rdquo;. The <code>title</code> field specifies the title of the post, the <code>date</code> field indicates when the post was created, and the <code>draft</code> field is set to <code>true</code>, which means that the post will not be published until you change it to <code>false</code>. More information about front matter can be found in the <a href="https://gohugo.io/content-management/front-matter/">Hugo documentation</a>.</p>
+<h3 id="quick-review-of-the-post-content">Quick review of the post content</h3>
+<p>Execute the command</p>
+<pre><code class="language-bash">hugo server -D
+</code></pre>
+<p>Then open your web browser and navigate to <code>http://localhost:1313/</code>. You should see your new post listed on the homepage. Click on the post title to view the full content of the post. Since the <code>draft</code> field is set to <code>true</code>, the post will not be visible on the public site until you change it to <code>false</code> and rebuild your site.</p>
+<h3 id="publish-the-post">Publish the post</h3>
+<p>To publish the post, open the <code>my-first-post.md</code> file and change the <code>draft</code> field from <code>true</code> to <code>false</code>. Then save the file and rebuild your site by running the command:</p>
+<pre><code class="language-bash">hugo
+</code></pre>
+<p>After rebuilding, your post will be published and visible on the public site. You can verify this by navigating to <code>http://localhost:1313/</code> again and checking that your post is now listed on the homepage.</p>
+
+</main>
+
+  <footer>
+  
+  
+  <hr/>
+  © Feng Wang
+  
+  </footer>
+  </body>
+</html>
+
