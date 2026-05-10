@@ -1,6 +1,7 @@
 ---
 title: "Hugo Qucik Introduction"
 date: 2026-03-10T21:20:12+01:00
+summary: 'First post with Hugo'
 draft: false
 ---
 

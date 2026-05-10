@@ -1,20 +1,22 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url>
-    <loc>http://localhost:1313/</loc>
-    <lastmod>2026-03-10T21:20:12+01:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/my-first-post/</loc>
-    <lastmod>2026-03-10T21:20:12+01:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2026-03-10T21:20:12+01:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/about/</loc>
-  </url><url>
-    <loc>http://localhost:1313/categories/</loc>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
-  </url>
-</urlset>
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"><url>
+    <loc>http://localhost:1313/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/hardware-aware-ml/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/knowledge-distillation/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/posts/llm-vlm-compression-foundations-clean/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/neural-architecture-search/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/posts/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/pruning/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/quantization/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/token-compression/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/vision-language-models/</loc><lastmod>2026-05-10T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/ai/</loc><lastmod>2026-03-26T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/posts/man-vs-ai-cn/</loc><lastmod>2026-03-26T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/%E4%B8%AA%E4%BA%BA%E4%BB%B7%E5%80%BC/</loc><lastmod>2026-03-26T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/%E6%8A%80%E6%9C%AF%E5%8F%98%E9%9D%A9/</loc><lastmod>2026-03-26T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/%E6%9C%AA%E6%9D%A5%E5%B1%95%E6%9C%9B/</loc><lastmod>2026-03-26T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/tags/%E7%A4%BE%E4%BC%9A%E7%BB%93%E6%9E%84/</loc><lastmod>2026-03-26T00:00:00+00:00</lastmod></url><url>
+    <loc>http://localhost:1313/posts/my-first-post/</loc><lastmod>2026-03-10T21:20:12+01:00</lastmod></url><url>
+    <loc>http://localhost:1313/about/</loc></url><url>
+    <loc>http://localhost:1313/categories/</loc></url></urlset>

@@ -1,11 +1,13 @@
 baseURL = 'https://fengwang.github.io/'
 languageCode = 'en-us'
-theme = 'xmin'
+theme = 'hugo-notepadium'
 title = "Feng's Blog"
 googleAnalytics = ""
 disqusShortname = ""
 ignoreFiles = [ "\\.Rmd$", "\\.Rmarkdown$", "_cache$" ]
 footnotereturnlinkcontents = "↩"
+enableRobotsTXT = true
+
 
 [permalinks]
 note = "/note/:year/:month/:day/:slug/"
@@ -38,22 +40,31 @@ url = "index.xml"
 [params]
 description = "Feng's minmal blog."
 footer = "&copy; Feng Wang"
-math = true
+
+[params.math]
+enable = true  # optional: true, false. Enable globally, default: false. You can always enable math on per page.
+#use = "katex"  # option: "katex", "mathjax". default: "katex"
+use = "mathjax"  # option: "katex", "mathjax". default: "katex"
+
+[params.syntax]
+use = "none"  # builtin: "prismjs", "hljs". "none" means Chroma
+theme = "xcode"
+darkTheme = "xcode-dark"  # apply this theme in dark mode
+
+[params.share]
+enable = false
+addThisId = ""
+inlineToolId = ""
+
+[params.nav]
+showCategories = true       # /categories/
+showTags = true             # /tags/
+
 
 [markup.highlight]
-codeFences = false
+codeFences = true
+noClasses = false
 
 [markup.goldmark.renderer]
 unsafe = true
-
-[markup.goldmark.extensions.passthrough]
-enable = true
-
-[markup.goldmark.extensions.passthrough]
-enable = true
-
-[markup.goldmark.extensions.passthrough.delimiters]
-block = [['\[', '\]'], ['$$', '$$']]
-inline = [['\(', '\)'], ['$', '$']]
-
 

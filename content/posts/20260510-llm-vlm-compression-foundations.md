@@ -128,7 +128,7 @@ Key design choices:
 
 At 50% sparsity, NIRVANA achieves WikiText2 PPL of 48.94 vs. 215.94 for LLM-Pruner on Llama3.1-8B. Ablation reveals that magnitude-based scoring alone causes extreme collapse (PPL ≈ 10⁵–10⁶), and removing adaptive allocation $\gamma$ raises PPL from 48.94 to 102.00.
 
-**FastForward Pruning** reformulates sparsity allocation as a single-step RL problem. The RL state is defined solely by the global target sparsity $\sigma_t$ (enabling transfer learning), with a ratio-based reward function ($\text{PPL}_{\text{dense}} / \text{PPL}_{\text{pruned}}$) that is scale-invariant for portability across model sizes. Results: 3.4× faster than EAS (6.13 vs. 23.6 GPU-hr) on LLaMA-V1 7B at 20% sparsity, with better PPL (6.64 vs. 6.89).
+**FastForward Pruning** reformulates sparsity allocation as a single-step RL problem. The RL state is defined solely by the global target sparsity $\sigma_t$ (enabling transfer learning), with a ratio-based reward function ( $\text{PPL}_{\text{dense}} / \text{PPL}_{\text{pruned}}$ ) that is scale-invariant for portability across model sizes. Results: 3.4× faster than EAS (6.13 vs. 23.6 GPU-hr) on LLaMA-V1 7B at 20% sparsity, with better PPL (6.64 vs. 6.89).
 
 #### VLM-specific structured pruning: UKMP
 
