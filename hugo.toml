@@ -38,6 +38,7 @@ url = "index.xml"
 [params]
 description = "Feng's minmal blog."
 footer = "&copy; Feng Wang"
+math = true
 
 [markup.highlight]
 codeFences = false
@@ -48,7 +49,11 @@ unsafe = true
 [markup.goldmark.extensions.passthrough]
 enable = true
 
-  [markup.goldmark.extensions.passthrough.delimiters]
-  block = [ [ "\\[", "\\]" ], [ "$$", "$$" ] ]
-  inline = [ [ "\\(", "\\)" ] ]
+[markup.goldmark.extensions.passthrough]
+enable = true
+
+[markup.goldmark.extensions.passthrough.delimiters]
+block = [['\[', '\]'], ['$$', '$$']]
+inline = [['\(', '\)'], ['$', '$']]
+
 
