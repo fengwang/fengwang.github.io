@@ -5,10 +5,184 @@
     <description>Recent content in Posts on Feng&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 10 May 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 11 May 2026 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>MoE Expert Pruning: What Works, What Doesn&#39;t, and What We Still Don&#39;t Know</title>
+      <link>http://localhost:1313/posts/moe-expert-pruning/</link>
+      <pubDate>Mon, 11 May 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/moe-expert-pruning/</guid>
+      <description>&lt;p&gt;I spent the last week reading seven papers on expert compression for Mixture-of-Experts models. I went in assuming the landscape was settled: expert pruning was a useful technique for shrinking models, expert merging was a promising alternative, and the choice between them was mostly a matter of taste. I came out with a very different picture. The pruning-vs-merging debate flipped in later 2025, and the reason it flipped tells you something fundamental about how these models actually work.&lt;/p&gt;
+&lt;p&gt;The core tension is simple. Sparse Mixture-of-Experts models activate only a fraction of their parameters per token, but they still occupy all of them in memory. Mixtral 8×7B activates 2 of 8 experts per layer — yet all 8 experts (45B of 47B total parameters) must sit on the GPU. NLLB-200 has 1,536 experts; you need four 32GB GPUs just to load the thing. Expert compression asks: can we drop or combine the experts that rarely get used, and how much does it cost?&lt;/p&gt;
+&lt;p&gt;The answer, across all seven papers, is surprising in two ways. First, you can drop far more experts than I expected, and the costs are concentrated in specific capabilities rather than spread evenly. Second, and more unexpectedly, &lt;strong&gt;when it comes to actual generative tasks — code, math, creative writing — expert pruning is decisively better than expert merging.&lt;/strong&gt; The merging methods that looked good on multiple-choice benchmarks collapse on tasks that require the model to actually generate tokens. The reason is structural, not empirical: merging removes the router&amp;rsquo;s fine-grained control over experts, and on generative tasks, that control matters.&lt;/p&gt;
+&lt;h2 id=&#34;why-expert-pruning-works-at-all&#34;&gt;Why expert pruning works at all&lt;/h2&gt;
+&lt;p&gt;Here&amp;rsquo;s the one-sentence model: &lt;strong&gt;expert utilization in MoE models is long-tailed — a handful of experts do most of the work, and the rest are along for the ride.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Think of it like a restaurant kitchen during a dinner rush. You have eight chefs at eight stations. On a given night, two chefs handle 80% of the orders. The other six are standing by, occasionally contributing a garnish, mostly drawing salary. If you fire four of them and redistribute their stations, dinner still gets served — maybe even faster, because the remaining chefs spend less time coordinating. That is expert pruning.&lt;/p&gt;
+&lt;p&gt;The numbers back this up. Heatmap analysis of Mixtral 8×7B on MMLU shows stark unevenness: Expert #2 in Layers 26 and 30 is heavily activated while Expert #7 in Layers 22 and 23 is barely touched [1]. The same pre-trained MoE model produces substantially different expert contribution patterns when fine-tuned on different tasks [2]. This task-specificity cuts both ways — it means pruning must be calibrated to the deployment domain, but it also means aggressive pruning is possible for narrow use cases.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The distribution is not just long-tailed — it&amp;rsquo;s task-dependent.&lt;/strong&gt; An expert that dominates on MNLI might be silent on CoLA. This is the core insight behind every pruning strategy: you are not removing universal knowledge. You are removing specialists that your specific task does not call.&lt;/p&gt;
+&lt;p&gt;Where the analogy breaks: experts are not independent chefs. The router learns to distribute tokens across experts during pre-training, and removing experts changes the routing distribution for the survivors. This is why naive pruning based on activation frequency alone performs &lt;em&gt;worse than random pruning&lt;/em&gt; [3]. The router expects a full kitchen.&lt;/p&gt;
+&lt;h3 id=&#34;knowledge-redundancy-the-surprising-overcapacity-result&#34;&gt;Knowledge redundancy: the surprising overcapacity result&lt;/h3&gt;
+&lt;p&gt;Here is the finding that made me stop and re-read: pruning 4 of 8 experts in Mixtral 8×7B-Instruct &lt;em&gt;improves&lt;/em&gt; SQuAD accuracy from 53.4% to 75.4%, without updating any remaining expert parameters [4]. This is not a typo. Removing half the experts makes the model &lt;em&gt;better&lt;/em&gt; at question answering.&lt;/p&gt;
+&lt;p&gt;The mechanism: pruning simplifies the routing problem. With 8 experts, the router must learn to partition the hidden space across many specialists — a hard optimization problem. With 4, the routing is easier, and the remaining experts each get a cleaner slice of the input distribution. The router stops sending ambiguous tokens to the wrong specialist.&lt;/p&gt;
+&lt;p&gt;This overcapacity effect is not universal, but it recurs: on data-limited downstream tasks, a single-expert model can outperform the full multi-expert counterpart. After fine-tuning a pruned Mixtral 8×7B on MetaMathQA, the 7-expert model slightly &lt;em&gt;exceeds&lt;/em&gt; the original 8-expert model on GSM8K (81.50 vs. 81.43) [3]. A single expert in Mixtral 8×7B-Instruct operates without model collapse [4].&lt;/p&gt;
+&lt;h2 id=&#34;pruning-vs-merging-the-debate-that-flipped-in-2025&#34;&gt;Pruning vs. merging: the debate that flipped in 2025&lt;/h2&gt;
+&lt;p&gt;Until mid-2025, the story seemed clear. Expert merging — clustering and averaging experts rather than discarding them — was winning. M-SMoE and HC-SMoE showed that merging outperformed pruning when measured by perplexity and multiple-choice question answering benchmarks. If you only looked at those numbers, merging was the smarter choice. Retain information from all experts. Avoid the binary brutality of pruning.&lt;/p&gt;
+&lt;p&gt;Then REAP showed up and asked: what happens when you actually make these models &lt;em&gt;generate&lt;/em&gt; tokens?&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The answer is a head-on collision between the two approaches.&lt;/strong&gt; On code generation, REAP achieves a mean accuracy decrease of only 1.9% at 25% compression and 6.9% at 50% compression. Merging methods? HC-SMoE and M-SMoE degrade more than 5% at 25% and more than 20% at 50% [7]. On creative writing and mathematical reasoning, the same pattern holds. Merging is not slightly worse — it is qualitatively broken on generative tasks at 50% compression.&lt;/p&gt;
+&lt;p&gt;Lasby et al. didn&amp;rsquo;t just report the numbers. They derived &lt;em&gt;why&lt;/em&gt; this has to be the case. When a router selects two experts f_i and f_j for a token, it produces a dynamic mixture r(x)·f_i(x) + (1−r(x))·f_j(x), where the mixing ratio r(x) depends on the input. After merging, the router must apply the summed gate to a constant convex combination — a static merged expert. The merged model must approximate a dynamic, input-dependent target with a static one. The resulting irreducible error is proportional to the router&amp;rsquo;s policy variability Var[r(x)] and the functional gap between the merged experts ∥Δ_ij∥ [7].&lt;/p&gt;
+&lt;p&gt;Pruning doesn&amp;rsquo;t have this problem. When you prune expert j, the router still controls each surviving expert independently. Pruning only incurs error when the pruned expert was in the top-k set, and that error is proportional to its gate-value g_j — it does not penalize policy variability at all [7]. The mathematical difference is clean: pruning is a coordinate subspace operation that preserves the functional manifold&amp;rsquo;s topology. Merging introduces novel functions and collapses the manifold toward its center — by up to 100× reduction in spread in late layers of high-granularity models [7].&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Here&amp;rsquo;s what this means in practice.&lt;/strong&gt; I can now look at a compressed model and predict failure modes based on the operation, not just the sparsity level. Merged model outputs have significantly lower N-gram diversity and their logits diverge from the original model more rapidly during auto-regressive generation [7]. The tokens drift. The model stops sounding like itself. MC benchmarks missed this entirely because they never asked the model to string tokens together — they only asked it to rank answer choices in a single forward pass.&lt;/p&gt;
+&lt;p&gt;One more uncomfortable finding: when merging &lt;em&gt;does&lt;/em&gt; work well, look closer. HC-SMoE produces a high prevalence of &lt;strong&gt;singleton clusters&lt;/strong&gt; — single-expert clusters that are functionally indistinguishable from keeping the expert unmerged [7]. The &amp;ldquo;merging&amp;rdquo; that succeeds is pruning plus a few mega-clusters of the truly redundant experts. And those mega-clusters are fragile: restricting the maximum cluster size to 32 experts causes large accuracy drops [7].&lt;/p&gt;
+&lt;p&gt;A separate problem compounds this. The L2-distance between clustered expert weights, even after weight-matching permutation, greatly exceeds the distance between pretrained and instruction-fine-tuned checkpoints. Singular-vector alignment remains poor [7]. Merging experts is fundamentally harder than the widely successful technique of model merging, and we should stop assuming the two are similar problems.&lt;/p&gt;
+&lt;h2 id=&#34;how-to-score-expert-importance&#34;&gt;How to score expert importance&lt;/h2&gt;
+&lt;p&gt;The choice of importance criterion is the single biggest lever in expert pruning. I organize the criteria by what information they use.&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Criterion&lt;/th&gt;
+          &lt;th&gt;Source&lt;/th&gt;
+          &lt;th&gt;What it measures&lt;/th&gt;
+          &lt;th&gt;Best result&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Alpha score (accumulated gating weight)&lt;/td&gt;
+          &lt;td&gt;Chen et al. 2022 [2]&lt;/td&gt;
+          &lt;td&gt;Weighted contribution to output&lt;/td&gt;
+          &lt;td&gt;Single expert preserves 99.3% of full MoE&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Soft counting (accumulated softmax)&lt;/td&gt;
+          &lt;td&gt;Muzio et al. 2024 [1]&lt;/td&gt;
+          &lt;td&gt;Confidence margin of selection&lt;/td&gt;
+          &lt;td&gt;25% sparsity: 3.85 pp MMLU drop&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Min-EAN (activation norm)&lt;/td&gt;
+          &lt;td&gt;Jaiswal et al. 2025 [5]&lt;/td&gt;
+          &lt;td&gt;Minimum activation magnitude&lt;/td&gt;
+          &lt;td&gt;14.02 PPL at 75% sparsity&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;REAP&lt;/strong&gt; (conditional g_j∥f_j∥)&lt;/td&gt;
+          &lt;td&gt;Lasby et al. 2025 [7]&lt;/td&gt;
+          &lt;td&gt;Gate × activation, conditional&lt;/td&gt;
+          &lt;td&gt;Near-lossless at 50%, up to 1T params&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Importance product (top1 × exp(conf))&lt;/td&gt;
+          &lt;td&gt;Koishekenov et al. 2023 [6]&lt;/td&gt;
+          &lt;td&gt;Combined activity and confidence&lt;/td&gt;
+          &lt;td&gt;80% pruning, chrF++ Δ = 0.29&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Activation frequency alone&lt;/td&gt;
+          &lt;td&gt;Lu et al. 2024 [3]&lt;/td&gt;
+          &lt;td&gt;Simple token count&lt;/td&gt;
+          &lt;td&gt;Worse than random&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;REAP deserves special attention because it&amp;rsquo;s the first criterion explicitly designed to minimize the reconstruction error bound. Its saliency score computes the conditional average of g_j(x)·∥f_j(x)∥ over only those tokens where expert j is active [7]. This decouples functional impact from usage frequency — a specialist expert that activates rarely but contributes heavily when it does won&amp;rsquo;t be pruned just because it&amp;rsquo;s infrequent. Min-EAN held the previous crown among 16 criteria benchmarked by MC-Suite [5]. REAP now looks like the new baseline for generative tasks, especially at scale.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The easy heuristic is still wrong.&lt;/strong&gt; Simple activation frequency — counting how many tokens each expert processes — does worse than random selection [3]. The router&amp;rsquo;s assignment frequency is not the same as contribution.&lt;/p&gt;
+&lt;p&gt;Domain-specific calibration delivers the biggest gap I&amp;rsquo;ve seen in any compression result. When REAP calibrates on C4 (general pre-training data) instead of domain-specific data (evol-codealpaca for code), code generation accuracy collapses — some compressed models produce 0% accuracy, failing to output coherent code at all [7]. This is not a matter of degree. The calibrating dataset determines whether the pruned model works or is completely useless on the target task. And this was already visible in earlier work: using MATH instead of C4 for calibration shifts expert selections in 28 of 32 layers of Mixtral 8×7B [3].&lt;/p&gt;
+&lt;h2 id=&#34;pruning-strategies-the-choices-that-matter&#34;&gt;Pruning strategies: the choices that matter&lt;/h2&gt;
+&lt;p&gt;Once you have an importance score, you need to decide &lt;em&gt;how&lt;/em&gt; to use it. Three choices define your strategy.&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Choice&lt;/th&gt;
+          &lt;th&gt;Options&lt;/th&gt;
+          &lt;th&gt;Trade-off&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Scope&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Global vs. layer-wise&lt;/td&gt;
+          &lt;td&gt;Global: better quality but variable per-layer counts. Layer-wise: fixed memory layout but lower ceiling&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Schedule&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;One-shot vs. iterative&lt;/td&gt;
+          &lt;td&gt;One-shot: fast but importance rankings are stale post-pruning. Iterative: ~2× better PPL but needs re-estimation&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Timing&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Eager vs. staged&lt;/td&gt;
+          &lt;td&gt;Eager: more optimization steps for survivors. Staged: better importance estimates from longer observation&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Global vs. layer-wise.&lt;/strong&gt; Global pruning — sorting all experts across all layers by a single importance ranking — outperforms layer-wise on quality because it avoids the constraint of keeping a fixed number per layer [1]. But it creates deployment headaches: variable per-layer expert counts mean variable memory usage across tasks, requiring model recreation for each configuration [6]. Layer-wise pruning gives predictable memory layouts at the cost of some quality.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;One-shot vs. iterative.&lt;/strong&gt; One-shot pruning drops experts in a single pass. The problem: after you remove experts, the importance rankings of the survivors change. Iterative pruning re-estimates importance after each round, achieving ~2× better perplexity. Add task-agnostic finetuning between rounds and you get ~3× better [5]. One-shot and iterative pruning identify &lt;em&gt;substantially different subsets&lt;/em&gt; of experts at the same sparsity level — they produce effectively different subnetworks [5]. REAP demonstrates that with the right criterion, one-shot pruning can be remarkably effective even at 50% compression on models up to 1T parameters [7], but the iterative advantage likely still holds.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Eager vs. staged.&lt;/strong&gt; Eager (progressive) pruning drops experts early using a dynamic threshold T = β / Z where Z is the number of surviving experts [2]. The earlier you drop, the more training steps you can dedicate to the selected expert. Eager consistently wins [2].&lt;/p&gt;
+&lt;h3 id=&#34;the-nllb-200-special-case-language-specific-pruning&#34;&gt;The NLLB-200 special case: language-specific pruning&lt;/h3&gt;
+&lt;p&gt;The NLLB-200 translation model surfaces a phenomenon that the Mixtral papers miss: &lt;strong&gt;language-specific expert emergence&lt;/strong&gt;. In the decoder, Jaccard similarity of selected experts is 68–87% for the same target language versus only 13–39% for different target languages [6]. Per-language pruning (source language for encoder, target language for decoder) performs as well as per-language-pair pruning while requiring only L configurations instead of L² [6]. An unbalanced 3:1 encoder-to-decoder ratio yields the best quality [6].&lt;/p&gt;
+&lt;h2 id=&#34;beyond-pruning-complementary-techniques&#34;&gt;Beyond pruning: complementary techniques&lt;/h2&gt;
+&lt;p&gt;Static expert pruning rarely stands alone. Four complementary techniques compound its gains, and there&amp;rsquo;s now a clearer distinction between approaches that help and approaches that hurt.&lt;/p&gt;
+&lt;h3 id=&#34;expert-merging-the-post-pruning-variant--and-why-its-different&#34;&gt;Expert merging (the post-pruning variant — and why it&amp;rsquo;s different)&lt;/h3&gt;
+&lt;p&gt;EEP&amp;rsquo;s expert merging is not the same thing as HC-SMoE or M-SMoE. EEP merges pruned expert knowledge into survivors &lt;em&gt;after&lt;/em&gt; pruning, using learned Router Mapping and Expert Merging matrices, adding 5–7% accuracy improvement [4]. This is a knowledge transfer operation — the pruned experts are already gone and their useful information is folded into the survivors. It&amp;rsquo;s fundamentally different from the HC-SMoE/M-SMoE approach of replacing entire expert groups with merged averages, which removes router independence and causes the collapse described above. The EEP variant is a net positive. The HC-SMoE variant is not, unless you&amp;rsquo;re only evaluating on multiple-choice.&lt;/p&gt;
+&lt;h3 id=&#34;dynamic-expert-skipping&#34;&gt;Dynamic expert skipping&lt;/h3&gt;
+&lt;p&gt;Static pruning removes experts permanently. Dynamic skipping removes them &lt;em&gt;conditionally&lt;/em&gt; — dropping the second-ranked expert for a token when its routing weight is below a threshold β times the top expert&amp;rsquo;s weight, yielding ~50% skipping probability [3]. The key finding: skipping is &lt;em&gt;complementary&lt;/em&gt; to pruning. A model pruned to 6 experts with skipping achieves the same speedup as pruning alone to 4 experts, but with higher accuracy [3]. You get the speedup without the full accuracy cost.&lt;/p&gt;
+&lt;h3 id=&#34;active-expert-reduction-and-finetuning&#34;&gt;Active expert reduction and finetuning&lt;/h3&gt;
+&lt;p&gt;Switching from top-2 to top-1 expert activation reduces forward-pass FLOPs by ~27% in Mixtral [1], but zero-shot top-1 routing drops SST5 accuracy from 50.8% to 42.6%. Recovery via entropy-based gating regularization plus annealing top-k reduction closes most of this gap (51.8% vs. 53.6% top-2) [1].&lt;/p&gt;
+&lt;p&gt;Task-agnostic finetuning (~1M tokens; benefits saturate) corrects the skewed load distribution caused by removing router entries. It doesn&amp;rsquo;t change which experts are selected — it mitigates impact through load rebalancing. This finetuning is central enough that iterative prune-estimate-finetune cycles produce what Jaiswal et al. call &lt;strong&gt;MoE Lottery Subnetworks&lt;/strong&gt; [5].&lt;/p&gt;
+&lt;h3 id=&#34;quantization-after-pruning&#34;&gt;Quantization after pruning&lt;/h3&gt;
+&lt;p&gt;Pruning combines naturally with quantization without additional steps, unlike merging which requires block-scale reconciliation for block quantization formats [7]. Combining REAP with 4-bit quantization on Kimi-K2 achieves 87.5% total size reduction — a compression rate neither technique can reach alone [7].&lt;/p&gt;
+&lt;h2 id=&#34;what-the-numbers-actually-say&#34;&gt;What the numbers actually say&lt;/h2&gt;
+&lt;p&gt;Across all seven papers, the efficiency-performance trade-off is more favorable than I expected.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;At moderate sparsity (25–50% experts removed), the accuracy cost on generative tasks is remarkably low — provided you prune, not merge.&lt;/strong&gt; REAP achieves a 1.9% mean accuracy decrease at 25% compression and 6.9% at 50% on coding benchmarks [7]. On Qwen3-Coder-480B and Kimi-K2, pruning 50% of experts drops code generation accuracy by only 1.2% [7]. On SWE-Bench (agentic software engineering), REAP-pruned Kimi-K2 at 50% compression actually slightly &lt;em&gt;exceeds&lt;/em&gt; the baseline (0.576 vs. 0.554) [7].&lt;/p&gt;
+&lt;p&gt;Compare with merging at the same compression: HC-SMoE and M-SMoE see &amp;gt;5% accuracy decrease at 25% and &amp;gt;20% at 50% on the same coding benchmarks [7]. Merging looks reasonable on MC benchmarks (~4% decrease at 25%) but the MC numbers don&amp;rsquo;t predict generative performance. This gap — between discriminative and generative evaluation — is what the pre-REAP literature missed.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;At high sparsity (75–80% experts removed), the numbers depend heavily on task type and recovery technique.&lt;/strong&gt; At 75% sparsity, Min-EAN achieves 14.02 PPL versus 34.47 random [5]. NLLB-200 at 80% pruning achieves chrF++ 36.61 versus 36.81 full — a delta of −0.2 [6]. Expert dropping predominantly degrades instruction-following, not pretraining knowledge or reasoning; these capabilities can be substantially restored through K-shot examples or fine-tuning [5].&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The fastest path to deployment, based on the evidence, is: Base model → expert pruning → finetuning → instruction tuning.&lt;/strong&gt; Expert dropping yields greater benefits before instruction tuning than after [5]. With SFT after pruning, high-sparsity models can outperform full counterparts on easier tasks like BoolQ and ARC-easy.&lt;/p&gt;
+&lt;h2 id=&#34;where-the-standard-story-breaks&#34;&gt;Where the standard story breaks&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;The standard story:&lt;/strong&gt; expert utilization is long-tailed. You prune the tail. Light finetuning recovers the loss. Any compression method that reduces the expert count should work about as well.&lt;/p&gt;
+&lt;p&gt;This story is wrong in ways that matter, and REAP is the paper that forced the correction.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pruning and merging are not interchangeable.&lt;/strong&gt; They produce qualitatively different models with different failure modes. Merging loses the router&amp;rsquo;s input-dependent control — an irreducible error proportional to the router&amp;rsquo;s policy variability. Pruning preserves it. On discriminative tasks, the difference is hidden because ranking answers in a single forward pass doesn&amp;rsquo;t require the model to maintain coherent generation. On generative tasks, the difference is dramatic [7].&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Discriminative metrics like perplexity and MC accuracy are poor proxies for generative quality.&lt;/strong&gt; This sounds obvious in retrospect, but the field relied on these metrics to claim merging &amp;gt; pruning. Jaiswal et al. had already warned that perplexity can be misleading for compressed LLMs [5]. REAP proved it with a clean experiment: merging methods that looked competitive on MC benchmarks collapsed on code generation to the point of producing 0% accuracy outputs [7]. If you evaluate a compressed model only on MC, you haven&amp;rsquo;t evaluated it at all for real-world use.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Expert-level sparsification still beats weight pruning, and the argument is now stronger.&lt;/strong&gt; Across equivalent sparsity levels, dropping whole experts outperforms Wanda by ~3.6% average accuracy and ~16.2% on ARC-c [5]. And expert pruning preserves manifold topology while weight pruning may not — the geometric analysis from REAP [7] provides a structural argument for why whole-expert removal is the more principled approach.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;High-vocabulary-coverage experts hurt when dropped&lt;/strong&gt; — the specialist-generalist tension is real. If an expert handles many distinct tokens, removing it does outsized damage [5]. This suggests that pre-training methods that push experts toward specialization may make pruning easier in one sense (more experts are &amp;ldquo;dispensable&amp;rdquo;) but harder in another (the remaining generalist experts carry structural load that can&amp;rsquo;t be removed).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Dominant experts have lower stable-rank&lt;/strong&gt; — a clean signal for identification but not yet exploited for additional compression [5].&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The second-pass degradation puzzle.&lt;/strong&gt; Two-pass eager-drop pruning degrades performance compared to a single pass, with average GLUE dropping by 0.58 points [2]. More iteration is not always better. But the REAP paper shows that a strong criterion in a single pass can go remarkably far — one-shot REAP on a 1T-parameter model at 50% compression is near-lossless on code [7]. The lesson isn&amp;rsquo;t &amp;ldquo;one-shot &amp;gt; iterative.&amp;rdquo; It&amp;rsquo;s that criterion quality and scale-appropriate calibration dominate the one-shot vs. iterative trade-off.&lt;/p&gt;
+&lt;h2 id=&#34;boundary-conditions&#34;&gt;Boundary conditions&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;The enumeration-based pruning approach in Lu et al. [3] works for 4–8 experts per layer but becomes computationally intractable at 32+ experts. The combinatorial explosion is unresolved.&lt;/li&gt;
+&lt;li&gt;Gradient-free methods like EEP&amp;rsquo;s evolutionary strategy [4] have been studied only on the Mixtral family. Whether they generalize to architectures with many more experts is unknown.&lt;/li&gt;
+&lt;li&gt;HC-SMoE&amp;rsquo;s mega-clusters containing tens of experts are fragile — restricting maximum cluster size to 32 causes large accuracy drops [7]. Coherently merging many experts remains an open problem.&lt;/li&gt;
+&lt;li&gt;Hallucination and over-generation have been observed in pruned translation models, with global threshold methods more sensitive than fixed-per-layer pruning [6].&lt;/li&gt;
+&lt;li&gt;All seven papers study static expert counts per layer. None address dynamic architectures where expert count varies by input complexity.&lt;/li&gt;
+&lt;li&gt;Qwen2-MoE experts are notably homogeneous — the &amp;ldquo;expert specialization&amp;rdquo; narrative is architecture-dependent [4].&lt;/li&gt;
+&lt;li&gt;Merging methods require recording activations from every expert for every token during calibration, making them more expensive at scale than pruning methods [7].&lt;/li&gt;
+&lt;li&gt;The pruning-vs-merging analysis from REAP [7] applies to one-shot, no-fine-tuning compression. Whether fine-tuning after merging can recover the policy variability loss is not addressed.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;open-questions&#34;&gt;Open questions&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;The REAP criterion&amp;rsquo;s derivation minimizes a reconstruction error bound assuming one-shot pruning. Can the same router-gate × activation-norm logic be extended to iterative pruning, and does it produce even better results?&lt;/li&gt;
+&lt;li&gt;Merging fails on generative tasks because it removes router independence. But could you &lt;em&gt;train&lt;/em&gt; a model to be merge-friendly — by regularizing expert functional similarity or router policy smoothness — and get the memory savings of merging without the generative collapse?&lt;/li&gt;
+&lt;li&gt;What is the interaction between expert pruning and quantization at scale? REAP showed the combination works [7], but only on one model family (Kimi-K2 at 4-bit). Do pruned experts tolerate lower-bit quantization better or worse than full experts?&lt;/li&gt;
+&lt;li&gt;The &amp;ldquo;MoE Lottery Subnetworks&amp;rdquo; framing [5] has only been studied up to Mixtral 8×22B. Does it hold at the scale REAP demonstrated (480B–1T parameters)?&lt;/li&gt;
+&lt;li&gt;The vocabulary coverage finding [5] — high-coverage experts hurt when dropped — implies a tension with specialization. If you make experts more specialized, you might make pruning easier, but you risk creating fragile specialists that cannot be removed. Which direction wins?&lt;/li&gt;
+&lt;li&gt;No paper in this set studies pruning during pre-training rather than post-training. Could you train an MoE from scratch knowing it will be pruned and get a better result?&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;[[Q]] Six months from now: has the community converged on REAP as the default one-shot pruning criterion, or has the merging community produced a variant that recovers router independence and closes the generative-task gap?&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Muzio et al., &amp;ldquo;SEER-MoE: Sparse Expert Efficiency through Regularization for Mixture-of-Experts&amp;rdquo;, arXiv:2404.05089, 2024.&lt;/li&gt;
+&lt;li&gt;Chen et al., &amp;ldquo;Task-Specific Expert Pruning for Sparse Mixture-of-Experts&amp;rdquo;, arXiv:2206.00277, 2022.&lt;/li&gt;
+&lt;li&gt;Lu et al., &amp;ldquo;Not All Experts are Equal: Efficient Expert Pruning and Skipping for Mixture-of-Experts Large Language Models&amp;rdquo;, ACL 2024.&lt;/li&gt;
+&lt;li&gt;Liu et al., &amp;ldquo;Efficient Expert Pruning for Sparse Mixture-of-Experts Language Models: Enhancing Performance and Reducing Inference Costs&amp;rdquo;, arXiv:2407.00945, 2024.&lt;/li&gt;
+&lt;li&gt;Jaiswal et al., &amp;ldquo;Finding Fantastic Experts in MoEs: A Unified Study for Expert Dropping Strategies and Observations&amp;rdquo;, arXiv:2504.05586, 2025.&lt;/li&gt;
+&lt;li&gt;Koishekenov et al., &amp;ldquo;Memory-efficient NLLB-200: Language-specific Expert Pruning of a Massively Multilingual Machine Translation Model&amp;rdquo;, ACL 2023.&lt;/li&gt;
+&lt;li&gt;Lasby et al., &amp;ldquo;REAP the Experts: Why Pruning Prevails for One-Shot MoE Compression&amp;rdquo;, arXiv:2510.13999, 2025.&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+    </item>
     
     <item>
       <title>LLM/VLM Compression Foundations</title>
@@ -145,8 +319,8 @@
 &lt;li&gt;&lt;strong&gt;Hardware-aware dimension alignment&lt;/strong&gt;: all hidden dimensions forced to multiples of 8 for Tensor Core compatibility&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Global joint ranking&lt;/strong&gt; across all layers/modules with a safeguard retaining ≥1 unit per layer to prevent collapse&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;At 50% sparsity, NIRVANA achieves WikiText2 PPL of 48.94 vs. 215.94 for LLM-Pruner on Llama3.1-8B. Ablation reveals that magnitude-based scoring alone causes extreme collapse (PPL ≈ 10⁵–10⁶), and removing adaptive allocation $\gamma$ raises PPL from 48.94 to 102.00.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;FastForward Pruning&lt;/strong&gt; reformulates sparsity allocation as a single-step RL problem. The RL state is defined solely by the global target sparsity $\sigma_t$ (enabling transfer learning), with a ratio-based reward function ( $\text{PPL}&lt;em&gt;{\text{dense}} / \text{PPL}&lt;/em&gt;{\text{pruned}}$ ) that is scale-invariant for portability across model sizes. Results: 3.4× faster than EAS (6.13 vs. 23.6 GPU-hr) on LLaMA-V1 7B at 20% sparsity, with better PPL (6.64 vs. 6.89).&lt;/p&gt;
+&lt;p&gt;At 50% sparsity, NIRVANA achieves WikiText2 perplexity (PPL) of 48.94 vs. 215.94 for LLM-Pruner on Llama3.1-8B. Ablation reveals that magnitude-based scoring alone causes extreme collapse (PPL ≈ 10⁵–10⁶), and removing adaptive allocation $\gamma$ raises PPL from 48.94 to 102.00.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;FastForward Pruning&lt;/strong&gt; reformulates sparsity allocation as a single-step RL problem. The RL state is defined solely by the global target sparsity $\sigma_t$ (enabling transfer learning), with a ratio-based reward function ( $PPL_{\text{dense}} / PPL_{\text{pruned}}$ ) that is scale-invariant for portability across model sizes. Results: 3.4× faster than EAS (6.13 vs. 23.6 GPU-hr) on LLaMA-V1 7B at 20% sparsity, with better PPL (6.64 vs. 6.89).&lt;/p&gt;
 &lt;h4 id=&#34;vlm-specific-structured-pruning-ukmp&#34;&gt;VLM-specific structured pruning: UKMP&lt;/h4&gt;
 &lt;p&gt;Text-only pruning methods fail on LVLMs because they treat the language backbone in isolation, ignoring the vision-language interface. &lt;strong&gt;UKMP (AAAI 2025)&lt;/strong&gt; introduces the first unified structured pruning framework purpose-built for LVLMs.&lt;/p&gt;
 &lt;p&gt;The &lt;strong&gt;UKMI metric&lt;/strong&gt; combines three innovations:&lt;/p&gt;
@@ -440,83 +614,6 @@
 &lt;li&gt;Multimodal Token Compression Survey, arXiv 2507.20198, 2025.&lt;/li&gt;
 &lt;li&gt;Efficient VLM Survey: &amp;ldquo;Efficient Vision-Language Models: A Survey&amp;rdquo;, 2025.&lt;/li&gt;
 &lt;/ol&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>AI时代，个体何以为家？</title>
-      <link>http://localhost:1313/posts/man-vs-ai-cn/</link>
-      <pubDate>Thu, 26 Mar 2026 00:00:00 +0000</pubDate>
-      
-      <guid>http://localhost:1313/posts/man-vs-ai-cn/</guid>
-      <description>&lt;h2 id=&#34;在不确定性中锚定自我的行动纲领&#34;&gt;在不确定性中锚定自我的行动纲领&lt;/h2&gt;
-&lt;p&gt;我们这代人，正不偏不倚地撞上一个历史的岔路口。眼看着技术洪流卷裹着社会加速狂奔，身后扬起的是前所未有的集体焦虑。尤其是在这波来势汹汹的人工智能浪潮里，一个直击灵魂的拷问像海底的暗涌，悄然浮出水面：当机器的智能和效率，已经无限逼近，甚至开始甩开人类时，我们这些凡夫俗子的价值，到底该往哪儿搁？我的脑子可不爱只停留在对“世界末日”的悲观预设上，那太没劲了。相反，我想把这看起来不可逆转的趋势，当作探路的起点，去琢磨琢磨，我们到底该如何凭着那点儿知识的微光，和一股子豁出去的劲头，为自己在这喧嚣中铸就一份意义，也为未来争取那么一点点更广阔的主体性自由。&lt;/p&gt;
-&lt;h3 id=&#34;一解构价值重构的底层逻辑&#34;&gt;一、解构“价值重构”的底层逻辑&lt;/h3&gt;
-&lt;p&gt;要我说，人类的价值定义，就像海边的沙滩，被历史的潮汐反复冲刷，变幻莫测。你想啊，从茹毛饮血的时代，你力气大、跑得快，就能直接换来一口吃的；到后来有了土地，生产资料成了硬通货；再到工业革命，机器轰鸣着取代了无数体力活和手艺人，每一次技术大跃进，都在不动声色地调整着生产要素那杆秤的砝码。数字互联刚冒头那会儿，不少人还以为个体的黄金时代真来了，结果呢？不过是把打工的舞台从实体工厂搬到了资本搭建的线上平台，真正的大头，还是进了平台所有者的腰包。&lt;/p&gt;
-&lt;p&gt;我琢磨来琢磨去，发现这些所谓的“进步”，嘴上说着要“解放人类”，骨子里玩的却是另一套把戏——悄悄地、系统性地“降低人在生产中的不可替代性”。它们把人那些独有的本事，一点点拆解成可以复制、可以掌控的工具，然后，咔嚓一下，个体在财富分配中的议价权就这么被无情地压低了。&lt;/p&gt;
-&lt;p&gt;而现在，AI的横空出世，特别是它开始渗透到认知、创意，甚至连情感领域都不放过的时候，我得说，这场“把人从价值链条上剔除”的游戏，算是彻底进入了终极阶段。这可是头一回，机器把替代的触角伸到了我们人类最引以为傲的智识高地。那些我们拍着胸脯说“这活儿只有人能干”的事儿，AI正以一种更高效、更廉价的方式，大摇大摆地接手。这意味着什么？意味着过去我们靠着苦读、靠着积累专业知识来挖的那条“护城河”，正在以肉眼可见的速度被填平。生产的核心要素，已经不再是简单的“资本+劳动”，而是彻底变成了“资本+AI”，而“劳动”这个砝码，正被无限趋近于零。这不是什么简单的技术性失业，各位，这可是一场社会财富分配逻辑的深层结构性大重构，它极有可能把我们的社会，推向一个前所未有的两极分化深渊。&lt;/p&gt;
-&lt;h3 id=&#34;二破除幻想直面现实壁垒&#34;&gt;二、破除幻想，直面现实壁垒&lt;/h3&gt;
-&lt;p&gt;面对眼前这个庞大得让人有点喘不过气来的结构性挑战，社会上当然不缺那些急着要“破局”的声音。你看，有人把希望寄托在“技术平权”上，天真地以为只要人人都能用上AI工具，就能把差距给抹平了；也有人扯着嗓子呼吁“制度干预”，指望着靠政策来重新分配蛋糕；更有甚者，还乐观得有点可爱，觉得等AI把所有“有用”的活儿都干完了，人类的价值就能回归到艺术、情感这类“无用”之事上去了。&lt;/p&gt;
-&lt;p&gt;可我这个人，向来喜欢把事情掰开了揉碎了看。一番理性审视下来，这些听起来很美的“破局”路径，恐怕都得撞上现实的几堵高墙：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;首先，什么“技术平权”，在我看来不过是个美丽的幻象。&lt;/strong&gt; 咱们个人能拿到的，顶多是AI的“使用权”，注意，是“使用权”，可不是“所有权”！AI最核心的壁垒——那天文数字般的算力、海量的数据、还有动辄几十上百亿参数的大模型——依然牢牢地攥在少数资本巨头手里。你想想，游戏的规则，制定权永远属于那些掌握生产资料的人，不是吗？&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;其次，指望“制度干预”来力挽狂澜，也面临着一个“囚徒困境”。&lt;/strong&gt; 资本这东西，早就把触角伸进了全球各国的政策体系，渗透之深，超乎想象。再加上各国之间为了抢占科技高地，那竞争简直是刺刀见红。在这种背景下，任何一个国家想要限制AI发展，都可能陷入“我限制了，别人没限制，那我不是傻了吗”的尴尬境地，结果往往是大家谁也别想管，只能眼睁睁看着资本的权重持续无限放大。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;最后，那些关于“价值重定义”的美好愿景，也得面对残酷的现实。&lt;/strong&gt; 没错，当AI把“有用”的活儿都抢走了，我们是能把重心放回艺术、情感这些“无用之事”上，可问题是，在现行的财富分配体系下，这些“无用之事”在经济上根本没有议价权啊！除非整个社会的基本价值体系来一次地动山摇式的根本性重构，否则，它们怎么可能成为我们个体安身立命的坚实基础呢？&lt;/p&gt;
-&lt;p&gt;所以你看，全民之所以焦虑得夜不能寐，根源压根儿不是什么“学不会AI”，而是我们这些清醒的旁观者，已经看透了：无论你个体如何拼命折腾，都很难成为AI时代的规则制定者，充其量，也只能是被这股洪流裹挟着前行的一员罢了。&lt;/p&gt;
-&lt;p&gt;然而，就算眼前这终局看起来板上钉钉、不可逆转，我心里头却依然有那么一份坚信：人类的能动性，可没那么容易就全然丧失。技术迭代的速度确实是指数级的，像坐上了火箭，可社会利益格局的重构啊，往往是线性的，像老牛拉破车。拦着AI全面落地，从来不只是技术本身，更多的是人性与利益那剪不断理还乱的复杂交织。你想想，那些既得利益群体的本能抗拒、国家对社会稳定的优先考量、还有咱们中国商业社会里头根深蒂固的人情世故和信任网络，这些可都是AI想全面替代，也得碰壁的无形壁垒。它们为我们争取到了一个宝贵的5到10年的“窗口期”。这个窗口期，可不是让我们躺平任嘲、坐以待毙的，恰恰相反，它提供了一个清醒的、不抱任何幻想的现实出口，一个让我们能够积累、能够转型、能够战略布局的绝佳机遇期。&lt;/p&gt;
-&lt;h3 id=&#34;三行动纲领在不确定中铸就主体性&#34;&gt;三、行动纲领：在不确定中铸就主体性&lt;/h3&gt;
-&lt;p&gt;启蒙思想教我们要理性自律，存在主义又在耳边低语，呼唤我们积极介入这个世界。到了AI时代，面对个体价值被大水稀释的宏大叙事，我们更该回归到最朴素的本源：把知识当作指路的火把，把行动当作渡河的舟楫，在这不确定性的大海里，牢牢地锚定住那个“我”，为自己铸就一份实实在在的主体性自由。&lt;/p&gt;
-&lt;h4 id=&#34;个体层面的自我铸就&#34;&gt;个体层面的自我铸就：&lt;/h4&gt;
-&lt;p&gt;先来说说我们最能直接掌控、也最有希望出成绩的领域——个体层面的自我铸就。毕竟，自己这亩三分地，总得先耕耘好不是？&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;首先，要卯足劲儿培养那些AI暂时还摸不着边儿的“元技能”和“复合能力”。&lt;/strong&gt; 这些是我们的独门绝技：
-你得练就一副&lt;strong&gt;批判性思维的火眼金睛&lt;/strong&gt;，能透过现象看本质，在信息爆炸和一团浆糊的模糊情境里，依然能独立做出判断，去解决那些AI看了都头疼的开放性、非线性难题。
-&lt;strong&gt;创新和创造力&lt;/strong&gt;更是重中之重。AI再厉害，也只是个超级缝合怪，真正的原创性思考、那种直击人心的艺术表达、还有跨领域的融合创新，它还真学不来。我们要把AI当成激发灵感、提升效率的趁手工具，而不是让它来替代我们思考。
-别忘了&lt;strong&gt;情感智能和人际协作&lt;/strong&gt;。领导力、沟通协调、同理心、谈判博弈、化解冲突、社群搭建……这些都是构建信任、连接人心的核心要素，是机器永远无法复制的柔软力量。
-我们还得成为AI的**“价值守门人”&lt;strong&gt;，在人机协作中，最终的伦理责任得由我们来扛。说到底，要确保技术这把双刃剑，是真真切切地服务于人类福祉，而不是反噬自身。
-最后，也是最关键的，是&lt;/strong&gt;终身学习与超级适应性**。别害怕变化，要把学习当成一种生存本能，持续驾驭AI的“新语言”和“新工具”，让AI成为我们自身能力的“超级放大器”，而不是扼杀器。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;其次，我们要积极积累那些能让我们“反脆弱”的资本。&lt;/strong&gt; 毕竟，手里有粮，心里不慌：
-&lt;strong&gt;物质资本&lt;/strong&gt;当然不能少。趁着这宝贵的窗口期，该赚的钱得努力赚，该攒的资产得好好攒，给自己多增加点财务冗余，真遇到大风大浪，也能有个兜底的。
-&lt;strong&gt;社会资本&lt;/strong&gt;更是无价之宝。好好经营你的人际关系、信任网络，多参与社群活动。要知道，那些深厚的人际连接和互助网络，是AI永远也复制不来的“价值堡垒”，关键时刻能救命。
-&lt;strong&gt;认知资本&lt;/strong&gt;也不能忽视。别光盯着AI怎么用，更要深入理解它背后的底层逻辑，这样才能形成高层次的判断力和战略预见性，不至于被新概念牵着鼻子走。
-最后，也别忘了&lt;strong&gt;健康资本&lt;/strong&gt;。身体是革命的本钱，身心健康，才能有足够的韧性去应对未来可能出现的各种挑战和压力，熬过这场大变局。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;最最后，也是最最深刻的，我们要重新审视和重构生命的意义。&lt;/strong&gt;
-别再死盯着纯粹的经济生产和效率至上那套了，是时候把重心挪一挪，多关注体验、连接、创造和自我实现。在艺术创作里找灵感、在志愿服务中找到价值、在家庭生活里感受温暖、在户外探索中找回野性……这些非经济的领域，往往藏着更深层次的意义感和满足感。
-不妨学着拥抱“慢生活”和“反效率”的价值观，去对抗AI裹挟而来的那种过度功利主义和速度崇拜。要知道，守护人类独有的、那些不可量化的体验维度，才是我们作为“人”的最后一道防线。&lt;/p&gt;
-&lt;h4 id=&#34;组织与社会层面的积极介入&#34;&gt;组织与社会层面的积极介入：&lt;/h4&gt;
-&lt;p&gt;当然，我们个体的努力并非孤立无援。涓涓细流汇成江海，通过积极的参与和倡议，我们完全可以汇聚起一股力量，去影响那些更广阔的系统，让它不至于偏航太远。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;我们可以倡导“人机共生”的理念，推动岗位重塑。&lt;/strong&gt; 鼓励那些组织和企业，别老想着让AI来“取代”人，而应该把它看作是人类能力的“增强器”。去设计那些人机协作的工作流程，创造出需要人类独特判断和创造力的新型“超级职位”，让AI成为我们的助手，而不是掘墓人。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;我们要不遗余力地推动教育体系的革新。&lt;/strong&gt; 大声疾呼，让教育别再是填鸭式的知识灌输，而是要彻底转向能力培养。把批判性思维、创造力、情商和伦理道德这些核心素养，摆到教学的C位，为我们的下一代，为他们能更好地适应AI时代做好万全准备。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;同时，也要密切关注并支持新型分配机制的探索。&lt;/strong&gt; 比如全民基本收入（UBI）、数据所有权、AI税等等，这些听起来有点超前的想法，或许正是未来社会财富分配的新方向。积极去了解它们的讨论和实践，促使技术带来的红利，能更广泛、更公平地惠及整个社会，而不是只流向少数人的口袋。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;别忘了，还要积极参与到AI伦理与治理框架的构建中去。&lt;/strong&gt; 关注AI的透明度够不够、它的决策能不能被解释、出了问题谁来负责。我们要大声倡导，把人类最核心的价值观融入AI的设计与应用中，给这匹脱缰的野马套上缰绳，避免技术最终失控，反噬我们自身。&lt;/p&gt;
-&lt;h3 id=&#34;四锚定人类价值共塑未来&#34;&gt;四、锚定人类价值，共塑未来&lt;/h3&gt;
-&lt;p&gt;说到底，我们今天所面对的，确实像是一场对人类个体价值的“终极清算”，一场足以颠覆现有社会结构的深远变革。但话说回来，我们这些浸润在启蒙理性与存在主义思潮中的个体，怎能轻易就把这“终局”当成无可逃避的宿命呢？知识，从来都是打破蒙昧、指引我们前行的火炬；而行动本身，更是在我们看清了世界的荒谬与挑战之后，依然选择勇敢地投身其中，为自己、也为我们所在的社群，一砖一瓦地铸就意义的过程。&lt;/p&gt;
-&lt;p&gt;真正的“体面”活法，绝不是在被告知“大势已去”之后，躺平了任由命运摆布。它应该是在这股技术洪流中，我们人类社会能够通过深思熟虑、而非盲目跟风，通过积极行动、而非被动接受，去共同构建一个以人类福祉为核心，以主体性自由为目标，一个真正可持续的未来。这并非要螳臂当车、逆转什么铁律，而是要先理解这些规律，然后在规律的缝隙里，找到我们人类能动性的最大化空间。所以，诸位，让我们把理性当作指引方向的灯塔，把勇气化作乘风破浪的风帆，在AI的滔天巨浪中，不仅仅是认识这个世界，更要撸起袖子，积极地去改造它，为人类的价值与尊严，锚定一个坚实而又光明的未来吧！&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Hugo Qucik Introduction</title>
-      <link>http://localhost:1313/posts/my-first-post/</link>
-      <pubDate>Tue, 10 Mar 2026 21:20:12 +0100</pubDate>
-      
-      <guid>http://localhost:1313/posts/my-first-post/</guid>
-      <description>&lt;h3 id=&#34;first-post-with-hugo&#34;&gt;First post with Hugo&lt;/h3&gt;
-&lt;p&gt;In the root folder, execute command&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;hugo new content content/posts/my-first-post.md
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This will create a new markdown file in the &lt;code&gt;content/posts&lt;/code&gt; directory with the name &lt;code&gt;my-first-post.md&lt;/code&gt;. The file will contain some default front matter, which you can edit to include your desired title, date, and other metadata.&lt;/p&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;---
-title: &amp;#34;My First Post&amp;#34;
-date: 2026-03-10T21:20:12+01:00
-draft: true
----
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The metadata are intoduced in Hugo as &amp;ldquo;front matter&amp;rdquo;. The &lt;code&gt;title&lt;/code&gt; field specifies the title of the post, the &lt;code&gt;date&lt;/code&gt; field indicates when the post was created, and the &lt;code&gt;draft&lt;/code&gt; field is set to &lt;code&gt;true&lt;/code&gt;, which means that the post will not be published until you change it to &lt;code&gt;false&lt;/code&gt;. More information about front matter can be found in the &lt;a href=&#34;https://gohugo.io/content-management/front-matter/&#34;target=&#34;_blank&#34; rel=&#34;noopener noreferrer&#34;&gt;Hugo documentation&lt;/a&gt;.&lt;/p&gt;
-&lt;h3 id=&#34;quick-review-of-the-post-content&#34;&gt;Quick review of the post content&lt;/h3&gt;
-&lt;p&gt;Execute the command&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;hugo server -D
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Then open your web browser and navigate to &lt;code&gt;http://localhost:1313/&lt;/code&gt;. You should see your new post listed on the homepage. Click on the post title to view the full content of the post. Since the &lt;code&gt;draft&lt;/code&gt; field is set to &lt;code&gt;true&lt;/code&gt;, the post will not be visible on the public site until you change it to &lt;code&gt;false&lt;/code&gt; and rebuild your site.&lt;/p&gt;
-&lt;h3 id=&#34;publish-the-post&#34;&gt;Publish the post&lt;/h3&gt;
-&lt;p&gt;To publish the post, open the &lt;code&gt;my-first-post.md&lt;/code&gt; file and change the &lt;code&gt;draft&lt;/code&gt; field from &lt;code&gt;true&lt;/code&gt; to &lt;code&gt;false&lt;/code&gt;. Then save the file and rebuild your site by running the command:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;hugo
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;After rebuilding, your post will be published and visible on the public site. You can verify this by navigating to &lt;code&gt;http://localhost:1313/&lt;/code&gt; again and checking that your post is now listed on the homepage.&lt;/p&gt;
 </description>
     </item>
     
