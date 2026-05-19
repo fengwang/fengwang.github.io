@@ -35,7 +35,7 @@ sources_used:
   - sources/qwen3-prune-handover.md
 ---
 
-> 本文是 [Pruning Qwen3.6-35B-A3B for RTX 5090](./20260518-qwen-pruning-rtx5090) 的中文版，更新至第 7 轮实验后的完整记录。
+> 本文是 [Pruning Qwen3.6-35B-A3B for RTX 5090](https://fengwang.github.io/posts/qwen-pruning-rtx5090/) 的中文版，更新至第 7 轮实验后的完整记录。
 
 ## 为什么会有这篇文章
 
