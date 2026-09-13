@@ -174,5 +174,4 @@ The watch point is the registered DAPO experiment. When it runs, it becomes the 
 
 1. Yifan Zhang et al., "Reliable RL Scaling Requires Accounting for Prefill–Decode Kernel Mismatch", Pretraining-RL-Science project report, August 6, 2026 (revised August 24, 2026). https://github.com/yifanzhang-pro/Pretraining-RL-Science
 2. Yifan Zhang et al., "Recurrent Looped Transformer", project report, September 2026. https://github.com/yifanzhang-pro/recurrent-looped-tranformer
-3. Vault reading notes used for this draft: wiki/concepts/prefill-decode-kernel-mismatch.md and wiki/concepts/recurrent-looped-transformer.md, with source extracts at sources/prefill-decode-kernel-mismatch.md and sources/recurrent-looped-transformer.md (claim ranges c-34903 through c-34926 and c-34883 through c-34902).
 
