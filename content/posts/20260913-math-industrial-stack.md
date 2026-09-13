@@ -1,7 +1,7 @@
 ---
-id: 20260913-math-industrial-stack-en
+id: 20260913-math-industrial-stack
 title: "From 'A Severe Misalignment' to a Mathematics Industrial Stack: A Critical Reading and a Blueprint"
-slug: math-industrial-stack-en
+slug: math-industrial-stack
 date: 2026-09-13
 lastmod: 2026-09-13
 draft: false
@@ -31,11 +31,11 @@ bibliography: ""
 code_repo: ""
 ---
 
-Why this exists: On September 11, 2026, twenty-five Fields medalists published "A Severe Misalignment of AI in Mathematics." Two days later I read the declaration once straight through and once in reverse, then translated the criticism into design: if treating proof-solving as a benchmark really is the problem, what kind of institution would fix it? I care about the next executable move, not about taking sides.
+Why this exists: On 2026/9/11, 25 Fields medalists published "A Severe Misalignment of AI in Mathematics." Two days later I read the declaration once straight through and once in reverse, then translated the criticism into design: if treating proof-solving as a benchmark really is the problem, what kind of institution would fix it? I care about the next executable move, not about taking sides.
 
 The thesis: the declaration diagnosed a real bottleneck, the community's digestion bandwidth, but filed it under a borrowed label; the right response is not to resist industrialization but to industrialize the guild's four functions, production, verification, transmission, and credit, one by one.
 
-Scope: this covers the declaration text and the event timeline, the strongest opposing case, the calibration between guilds and industrialization, and the design of a four-layer industrial stack for mathematics. It does not cover the signatories' individual positions or independent verification of OpenAI's technical results. None of the three proposed pilots has been run; every design in this article is untested.
+Scope: this covers the declaration text and the event timeline, the strongest opposing case, the calibration between guilds and industrialization, and the design of a four-layer industrial stack for mathematics. It does not cover the signatories' individual positions or independent verification of OpenAI's technical results. Every design in this article is never untested, and is just a result of brainstorming.
 
 Prerequisites: this assumes familiarity with the norms of pure mathematics research, basic concepts of Lean / mathlib and formal verification, and the general shape of research funding and incentive structures.
 
@@ -45,7 +45,7 @@ The declaration itself is short on paper. "A Severe Misalignment of AI in Mathem
 
 What triggered it was a chain of events in late August and early September. The direct fuse: OpenAI announced that an internal model, running roughly 10,000 agents for 88 hours, had "solved" a Navier-Stokes blowup-class problem. Four days earlier, Buckmaster and Alpöge (Anthropic) had released a 245-page draft on the forced Euler equation and accused OpenAI of scooping it. As the authorship dispute escalated, OpenAI withdrew its sponsorship of the Caltech math marathon. The letter's core claims: AI companies treat "solving famous problems" as a benchmark, badly misaligned with the mathematics community's goals; rushed announcements, no formal write-ups, and recurring authorship and plagiarism problems; and without the human community digesting them, AI's ideas "can never come alive."
 
-I pinned the key nodes to a timeline, because these details have been rewritten through several rounds of retelling:
+I pinned the key nodes to a timeline first, because these details have been rewritten through several rounds of retelling:
 
 | Date | Event | Reliability |
 |---|---|---|
@@ -63,7 +63,7 @@ Pin the timeline first, then argue: the declaration and the counter-declaration 
 
 ## Dissection: five claims and one concept slide
 
-On the first pass I nodded at nearly everything: benchmarks, scooping, authorship, student training, every item sounded right. On the second pass, item by item, approval and wariness rose together. The declaration's case breaks into five claims, with hidden premises and my assessment:
+On the first pass I agreed with nearly everything: benchmarks, scooping, authorship, student training, every item sounded right. On the second pass, item by item, approval and wariness rose together. I broke the declaration's case into five claims, with hidden premises and my assessment:
 
 | # | Claim | Hidden premise | Assessment |
 |---|---|---|---|
@@ -77,7 +77,7 @@ The two loudest rows are claims 2 and 3: "mass production destroys the soil" is 
 
 More important is a slide that sits outside the table. The title condemns "treating problem-solving as a benchmark," but nearly every harm listed in the body comes from speed, authorship, and data provenance. Those are conduct problems, not problems with benchmark-making as such. Hilbert's 23 problems were a benchmark set by the community itself, and nobody accused them of destroying mathematics. The real variable is **who owns the benchmark and what incentives it settles**: community-set, honor-settled, on a ten-year clock, versus company-set, funding-narrative-settled, on a weekly clock. Same machinery; who holds the dial and whose clock it runs on is the entire difference.
 
-Having written that dissection, my verdict on the declaration: true, rhetorically skilled, its core worry sound, its argumentative structure visibly incomplete. More war cry than argument. And it commits the same rushed-publication error it condemns, written in a week. Confidence: medium-high. The text was checked word by word; the OpenAI-side details rest on a single secondhand source.
+Having written that dissection, my impression on the declaration: true, rhetorically skilled, its core worry sound, its argumentative structure visibly incomplete. More war cry than argument. And it commits the same rushed-publication error it condemns, written in a week. Confidence: medium-high. The text was checked word by word; the OpenAI-side details rest on a single secondhand source.
 
 ## What holds: proofs are compressed packages, the community is the decompressor
 
@@ -99,7 +99,7 @@ The insight holds best for pure mathematics. Pure mathematics has almost no dire
 
 ## What does not hold: borrowed rhetoric and the silence on formalization
 
-After reading the declaration until it went stale, I recorded five hard defects. The fifth is the strangest, because the tool it ignores is the one the most AI-literate signatory has championed for years.
+After reading the declaration until it went stale, I extracted five hard defects. The fifth is the strangest, because the tool it ignores is the one the most AI-literate signatory has championed for years.
 
 1. Paradoxical self-undermining. To meet "urgency," it skipped the eight-month consultation used by the Leiden Declaration and was written in a week, repeating the rushed publication it condemns. Tao himself acknowledged it was "unfortunate." A text asking an industry to slow down did not slow down.
 2. "Misalignment" is borrowed rhetoric. In AI safety the term has a specific meaning; what the declaration actually describes is incentive misalignment and externalities. The verb is its own; the noun is borrowed. Clever for reach, loose for precision.
@@ -117,7 +117,7 @@ The case runs: benchmark competition harms no theorem's truth value. A true proo
 
 I agree with the opposition's three factual points: truth values are unharmed, authorship disputes are procedural, and tool revolutions have precedent. But it cannot answer digestion bandwidth. The declaration's real claim lives not at the truth level but at the level of how knowledge is socially produced: for pure mathematics, understanding is the product, and a true-but-ununderstood theorem barely exists. The backlog is not an honor problem; it is a problem of the discipline's capacity to reproduce itself. So the right reading is not either/or but both layers stacked: optimistic at the truth layer, watchful at the production layer. The declaration's error is billing both layers to "benchmarks"; the opposition's limit is refusing to look at the second layer at all.
 
-Two bias inventories go on the record. For the declaration: appeal to authority, framing effects, availability (one incident generalized to all companies), group reinforcement (a like-minded draft in a week). For my side: collaborating with a model to analyze a declaration about models is a conflict of interest. The only workable rule is to score argument quality, not identity. The same rule applies to the signatories: the argument is in the body, not the signature block.
+Two bias inventories go on the record. For the declaration: appeal to authority, framing effects, availability (one incident generalized to all companies), group reinforcement (a like-minded draft in a week). For my side: collaborating with an LLM model to analyze a declaration about models is a conflict of interest. The only workable rule is to score argument quality instead of identity. The same rule applies to the signatories: the argument is in the body, not the signature block.
 
 ## Calibration: guilds and industrialization are not a zero-sum replacement
 
@@ -188,8 +188,8 @@ There is exactly one single point of failure, and it is load-bearing: the whole 
 
 ## Open questions
 
-1. Which pilot runs first? I lean toward the layered proof bundle demo: cheapest (1-2 weeks), and it tests the most central assumption of the four layers, the understanding layer.
-2. Will mathandai.org's co-signing list grow beyond Fields medalists? If it does, the declaration's representation shifts from elite wing to community, and its argumentative weight shifts with it.
+1. Which pilot first? I lean toward the layered proof bundle demo: cheapest (1-2 weeks), and it tests the most central assumption of the four layers, the understanding layer.
+2. Will mathandai.org's co-signing list grow beyond Fields medalists? If so, the declaration's representation shifts from elite wing to community, and its argumentative weight shifts with it.
 3. When will independent verification of OpenAI's NS result land? It tests both the declaration's "misconduct" pillar and the credibility baseline for AI proofs.
 4. Will the Leiden Declaration's concrete recommendations absorb this anger into a combined text with actual asks? From indictment to institution-building is one step.
 5. Is there an acceptable threshold for formalization coverage? If geometric and intuitive arguments can only ever be partially formalized, should the stack design a bypass for the formalization-resistant zone?
