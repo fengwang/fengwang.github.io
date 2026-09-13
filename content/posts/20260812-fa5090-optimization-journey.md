@@ -4,7 +4,7 @@ title: "The FA5090 Optimization Journey: From 3.23% to 94.6% of Roofline on a Co
 slug: fa5090-optimization-journey
 date: 2026-08-12
 lastmod: 2026-08-12
-draft: false
+draft: true
 format: "long"
 domain: deep-learning
 subdomain: gpu-kernel-optimization
