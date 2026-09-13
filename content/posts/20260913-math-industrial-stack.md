@@ -4,7 +4,7 @@ title: "数学行会的工业化是出路么？"
 slug: math-industrial-stack
 date: 2026-09-13
 lastmod: 2026-09-13
-draft: true
+draft: false
 format: "long"
 domain: mathematics
 subdomain: ai-and-mathematics
