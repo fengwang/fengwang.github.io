@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="An interactive, trace-driven explainer of FlashAttention-1 and FlashAttention-2."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>FlashAttention, tile by tile</title>
+    <script type="module" crossorigin src="./assets/index-daiql1ez.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BEeWmoer.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#chapter">Skip to the explanation</a>
+    <header class="topbar">
+      <h1>FlashAttention <span class="h1-sub">tile by tile</span></h1>
+      <nav class="chapter-nav" aria-label="Chapters">
+        <button
+          type="button"
+          data-action="prev-chapter"
+          aria-label="Previous chapter"
+          title="Previous chapter (PageUp or [)"
+        >
+          <span aria-hidden="true">‹</span>
+        </button>
+        <select id="chapter-select" aria-label="Chapter outline"></select>
+        <button type="button" data-action="next-chapter" aria-label="Next chapter" title="Next chapter (PageDown or ])">
+          <span aria-hidden="true">›</span>
+        </button>
+      </nav>
+      <div class="topbar-tools">
+        <button type="button" data-action="glossary" data-value="all">Glossary</button>
+        <button type="button" data-action="references">References</button>
+        <button
+          type="button"
+          class="help"
+          data-action="help"
+          aria-label="Keyboard shortcuts"
+          title="Keyboard shortcuts (?)"
+        >
+          ?
+        </button>
+      </div>
+    </header>
+    <main class="layout">
+      <section class="stage" aria-label="Visualization">
+        <div class="canvas-wrap">
+          <canvas
+            id="scene"
+            role="img"
+            aria-label="Memory hierarchy: tensor tiles in HBM, resident tiles in SRAM and the loop map; the caption below describes the current step"
+          ></canvas>
+          <div id="labels" class="labels" aria-hidden="true"></div>
+          <div id="fallback" class="fallback" role="alert" hidden>
+            <h2>The 3D scene needs WebGL 2</h2>
+            <p>
+              This browser or device cannot create a WebGL 2 context, so the animation is unavailable. The explanation,
+              pseudocode, counters, charts and controls all still work.
+            </p>
+          </div>
+          <div id="notice" class="notice" role="status" hidden></div>
+        </div>
+        <div id="legend" class="legend-wrap"></div>
+        <div id="sram-list" class="sram-list-wrap"></div>
+        <p id="caption" class="caption" aria-live="polite"></p>
+        <div id="controls" class="controls" role="toolbar" aria-label="Playback"></div>
+        <div class="readouts">
+          <section id="counters" class="panel" aria-label="Live counters"></section>
+          <section id="pseudocode" class="panel" aria-label="Pseudocode" tabindex="0"></section>
+        </div>
+      </section>
+      <article id="chapter" class="chapter" tabindex="0" aria-labelledby="chapter-title"></article>
+    </main>
+    <div id="overlay" class="overlay" hidden></div>
+  </body>
+</html>
